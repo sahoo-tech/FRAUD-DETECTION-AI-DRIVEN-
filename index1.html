@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AEGIS AI - Fraud Detection Nexus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0A192F;
+            --bg-secondary: #4A148C;
+            --bg-tertiary: #000000;
+            --accent-info: #00FFFF;
+            --accent-warning: #FF00FF;
+            --accent-safe: #39FF14;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(45deg, var(--bg-primary), var(--bg-secondary), var(--bg-tertiary));
+            background-size: 400% 400%;
+            animation: gradientShift 20s ease infinite;
+            color: white;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .boot-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 1;
+            transition: opacity 2s ease;
+        }
+
+        .boot-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .boot-text {
+            font-size: 2rem;
+            color: var(--accent-info);
+            text-shadow: 0 0 20px var(--accent-info);
+            animation: glitch 2s infinite;
+        }
+
+        @keyframes glitch {
+            0%, 100% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            grid-template-rows: auto 1fr auto;
+            gap: 20px;
+            padding: 20px;
+            min-height: 100vh;
+            opacity: 0;
+            animation: fadeIn 1s ease 3s forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        .header {
+            grid-column: 1 / -1;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+            animation: scan 3s infinite;
+        }
+
+        @keyframes scan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent-info);
+            text-shadow: 0 0 30px var(--accent-info);
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-info), transparent);
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--accent-info);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: var(--accent-info);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .analyze-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, var(--accent-info), var(--accent-warning));
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            animation: btnPulse 2s infinite;
+        }
+
+        @keyframes btnPulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 255, 255, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(0, 255, 255, 0.8); }
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.6);
+        }
+
+        .analyze-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .risk-gauge-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 400px;
+        }
+
+        .risk-gauge {
+            width: 250px;
+            height: 250px;
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .gauge-bg {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, #333 0deg 180deg, transparent 180deg);
+            position: relative;
+        }
+
+        .gauge-fill {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: conic-gradient(from 0deg, var(--accent-safe) 0deg, transparent 0deg);
+            transition: all 1s ease;
+        }
+
+        .gauge-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 150px;
+            height: 150px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--accent-info);
+        }
+
+        .risk-score {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent-info);
+            text-shadow: 0 0 20px currentColor;
+        }
+
+        .risk-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 5px;
+        }
+
+        .ai-summary {
+            text-align: center;
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.6;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .typing-cursor {
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .threat-factors {
+            margin-bottom: 30px;
+        }
+
+        .factor-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .factor-name {
+            flex: 1;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .factor-bar {
+            width: 100px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-left: 10px;
+        }
+
+        .factor-fill {
+            height: 100%;
+            background: var(--accent-warning);
+            width: 0%;
+            transition: width 1s ease;
+            border-radius: 4px;
+        }
+
+        .world-map {
+            width: 100%;
+            height: 200px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 500"><rect width="1000" height="500" fill="%23001122"/><path d="M200,100 Q300,80 400,100 Q500,120 600,100 Q700,80 800,100 L800,200 Q700,220 600,200 Q500,180 400,200 Q300,220 200,200 Z" fill="%23003366" opacity="0.5"/><path d="M150,250 Q250,230 350,250 Q450,270 550,250 Q650,230 750,250 L750,350 Q650,370 550,350 Q450,330 350,350 Q250,370 150,350 Z" fill="%23004488" opacity="0.5"/></svg>') center/cover;
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .location-dot {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: var(--accent-info);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--accent-info);
+            animation: pulse 2s infinite;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.5); }
+        }
+
+        .transaction-ledger {
+            grid-column: 1 / -1;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .ledger-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .ledger-table th {
+            background: rgba(0, 255, 255, 0.1);
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--glass-border);
+            color: var(--accent-info);
+            font-weight: 600;
+        }
+
+        .ledger-table td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .status-approved { color: var(--accent-safe); }
+        .status-flagged { color: #FFA500; }
+        .status-denied { color: #FF4444; }
+
+        .processing-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 15px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .processing-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .processing-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(0, 255, 255, 0.3);
+            border-top: 3px solid var(--accent-info);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto auto auto;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .risk-gauge {
+                width: 200px;
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="boot-overlay" id="bootOverlay">
+        <div class="boot-text">AEGIS AI INITIALIZING...</div>
+    </div>
+
+    <div class="dashboard">
+        <header class="header">
+            <h1>AEGIS AI - Fraud Detection Nexus</h1>
+            <p>Advanced Intelligence Command Center</p>
+        </header>
+
+        <div class="glass-card">
+            <div class="card-title">Initiate Analysis</div>
+            <form id="transactionForm">
+                <div class="input-group">
+                    <label for="amount">Transaction Amount</label>
+                    <input type="number" id="amount" name="amount" step="0.01" required>
+                </div>
+                <div class="input-group">
+                    <label for="currency">Currency</label>
+                    <select id="currency" name="currency" required>
+                        <option value="USD">USD</option>
+                        <option value="EUR">EUR</option>
+                        <option value="GBP">GBP</option>
+                        <option value="JPY">JPY</option>
+                        <option value="CAD">CAD</option>
+                        <option value="AUD">AUD</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="merchant">Merchant Name</label>
+                    <input type="text" id="merchant" name="merchant" required>
+                </div>
+                <div class="input-group">
+                    <label for="cardType">Card Type</label>
+                    <select id="cardType" name="cardType" required>
+                        <option value="credit">Credit</option>
+                        <option value="debit">Debit</option>
+                        <option value="prepaid">Prepaid</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="location">User Location</label>
+                    <input type="text" id="location" name="location" required>
+                </div>
+                <button type="submit" class="analyze-btn" id="analyzeBtn">ANALYZE SIGNATURE</button>
+            </form>
+            <div class="processing-overlay" id="processingOverlay">
+                <div class="processing-spinner"></div>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <div class="risk-gauge-container">
+                <div class="risk-gauge">
+                    <div class="gauge-bg">
+                        <div class="gauge-fill" id="gaugeFill"></div>
+                        <div class="gauge-center">
+                            <div class="risk-score" id="riskScore">--</div>
+                            <div class="risk-label">Risk Score</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ai-summary" id="aiSummary">Awaiting transaction data...</div>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <div class="card-title">Threat Vector Analysis</div>
+            <div class="threat-factors" id="threatFactors">
+                <div class="factor-item">
+                    <span class="factor-name">System Ready</span>
+                    <div class="factor-bar">
+                        <div class="factor-fill" style="width: 100%; background: var(--accent-safe);"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-title">Transaction Geolocation</div>
+            <div class="world-map" id="worldMap">
+                <!-- Location dot will be dynamically positioned -->
+            </div>
+        </div>
+
+        <div class="transaction-ledger">
+            <div class="card-title">Live Transaction Ledger</div>
+            <table class="ledger-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Amount</th>
+                        <th>Merchant</th>
+                        <th>Status</th>
+                        <th>Risk Score</th>
+                        <th>Location</th>
+                    </tr>
+                </thead>
+                <tbody id="ledgerBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration - Updated to use backend endpoint
+        const API_BASE_URL = 'http://localhost:3000/api';
+
+        // Global variables
+        let transactionId = 1;
+        let transactions = [];
+        // User tracking implementation
+        let currentUserId = 'user_' + Math.random().toString(36).substr(2, 9);
+
+        // Boot sequence - Enhanced with data loading
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('bootOverlay').classList.add('hidden');
+                // Load initial data on startup
+                loadRecentTransactions();
+                loadUserProfile();
+            }, 3000);
+        });
+
+        // Form submission handler
+        document.getElementById('transactionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const transactionData = {
+                amount: parseFloat(formData.get('amount')),
+                currency: formData.get('currency'),
+                merchant: formData.get('merchant'),
+                cardType: formData.get('cardType'),
+                location: formData.get('location'),
+                timestamp: new Date().toISOString(),
+                userId: currentUserId // Include userId in transaction requests
+            };
+
+            await analyzeTransaction(transactionData);
+        });
+
+        // Main analysis function - Updated function name and error handling
+        async function analyzeTransaction(transactionData) {
+            showProcessing(true);
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/analyze-fraud`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(transactionData)
+                });
+
+                // Enhanced error handling with specific HTTP status codes
+                if (!response.ok) {
+                    if (response.status === 429) {
+                        throw new Error('Rate limit exceeded. Please wait before making another request.');
+                    } else if (response.status === 500) {
+                        throw new Error('Server error occurred. Please try again later.');
+                    } else if (response.status === 400) {
+                        throw new Error('Invalid transaction data provided.');
+                    } else {
+                        throw new Error(`Request failed with status: ${response.status}`);
+                    }
+                }
+
+                
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw new Error(result.message || 'Analysis failed');
+                }
+
+                updateUI(result.analysis, transactionData);
+                addTransactionToLedger(transactionData, result.analysis);
+            } catch (error) {
+                console.error('Analysis failed:', error);
+                // Enhanced error messages for better user experience
+                if (error.message.includes('fetch')) {
+                    showError('Network connectivity issue. Please check your connection and try again.');
+                } else {
+                    showError(error.message || 'Analysis failed. Please try again.');
+                }
+            } finally {
+                showProcessing(false);
+            }
+        }
+
+        // Load Recent Transactions function
+        async function loadRecentTransactions() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/recent-transactions?userId=${currentUserId}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.transactions) {
+                        // Populate the transaction ledger with real data
+                        data.transactions.forEach(transaction => {
+                            addTransactionToLedger(transaction, transaction.analysis);
+                        });
+                        console.log('Loaded recent transactions:', data.transactions.length);
+                    }
+                } else {
+                    console.log('No recent transactions found or server unavailable');
+                }
+            } catch (error) {
+                console.error('Failed to load recent transactions:', error);
+                // Gracefully handle errors - don't show error to user for background loading
+            }
+        }
+
+        // Load User Profile function
+        async function loadUserProfile() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/user/${currentUserId}/profile`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        console.log('User profile loaded:', data.profile);
+                        // Log profile data to console for debugging
+                    }
+                } else if (response.status === 404) {
+                    console.log('New user detected - no existing profile found');
+                } else {
+                    console.log('Failed to load user profile');
+                }
+            } catch (error) {
+                console.error('Failed to load user profile:', error);
+                // Handle 404 errors for new users gracefully
+            }
+        }
+
+        // Enhanced UI update function to handle additional data
+        function updateUI(analysis, transactionData) {
+            updateRiskGauge(analysis.riskScore);
+            updateAISummary(analysis.summary);
+            updateThreatFactors(analysis.riskFactors);
+            updateGeolocation(transactionData.location);
+            
+            // Display recommendations if available
+            if (analysis.recommendations && analysis.recommendations.length > 0) {
+                console.log('Recommendations:', analysis.recommendations);
+            }
+            
+            // Show alert levels (CRITICAL/HIGH/MEDIUM/LOW)
+            if (analysis.alertLevel) {
+                console.log('Alert Level:', analysis.alertLevel);
+            }
+            
+            // Handle confidence scores
+            if (analysis.confidence) {
+                console.log('Confidence Score:', analysis.confidence + '%');
+            }
+            
+            // Log additional analysis metadata
+            if (analysis.transactionId) {
+                console.log('Transaction ID:', analysis.transactionId);
+            }
+        }
+
+        function updateRiskGauge(score) {
+            const gaugeFill = document.getElementById('gaugeFill');
+            const riskScore = document.getElementById('riskScore');
+            
+            // Determine color based on score
+            let color = '#39FF14'; // Green
+            if (score >= 40 && score < 70) color = '#FFA500'; // Orange
+            if (score >= 70) color = '#FF4444'; // Red
+            
+            // Update gauge
+            const angle = (score / 100) * 180;
+            gaugeFill.style.background = `conic-gradient(from 0deg, ${color} 0deg ${angle}deg, transparent ${angle}deg)`;
+            gaugeFill.style.filter = `drop-shadow(0 0 20px ${color})`;
+            
+            // Animate score
+            animateNumber(riskScore, score);
+        }
+
+        function animateNumber(element, targetNumber) {
+            const startNumber = 0;
+            const duration = 1000;
+            const startTime = Date.now();
+            
+            function update() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const current = Math.floor(startNumber + (targetNumber - startNumber) * progress);
+                
+                element.textContent = current;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                }
+            }
+            
+            update();
+        }
+
+        function updateAISummary(summary) {
+            const summaryElement = document.getElementById('aiSummary');
+            summaryElement.textContent = '';
+            
+            let i = 0;
+            const typeWriter = () => {
+                if (i < summary.length) {
+                    summaryElement.textContent += summary.charAt(i);
+                    i++;
+                    setTimeout(typeWriter, 50);
+                } else {
+                    // Add blinking cursor briefly
+                    summaryElement.innerHTML += '<span class="typing-cursor">|</span>';
+                    setTimeout(() => {
+                        const cursor = summaryElement.querySelector('.typing-cursor');
+                        if (cursor) cursor.remove();
+                    }, 2000);
+                }
+            };
+            
+            typeWriter();
+        }
+
+        function updateThreatFactors(factors) {
+            const container = document.getElementById('threatFactors');
+            container.innerHTML = '';
+            
+            Object.entries(factors).forEach(([factor, score]) => {
+                const factorElement = document.createElement('div');
+                factorElement.className = 'factor-item';
+                factorElement.innerHTML = `
+                    <span class="factor-name">${factor.replace(/([A-Z])/g, ' \$1').trim()}</span>
+                    <div class="factor-bar">
+                        <div class="factor-fill"></div>
+                    </div>
+                `;
+                container.appendChild(factorElement);
+                
+                // Animate bar after a short delay
+                setTimeout(() => {
+                    const fill = factorElement.querySelector('.factor-fill');
+                    fill.style.width = `${score}%`;
+                    
+                    // Color based on score
+                    if (score < 30) fill.style.background = '#39FF14';
+                    else if (score < 70) fill.style.background = '#FFA500';
+                    else fill.style.background = '#FF4444';
+                }, 300);
+            });
+        }
+
+        function updateGeolocation(location) {
+            const map = document.getElementById('worldMap');
+            
+            // Remove existing dots
+            const existingDots = map.querySelectorAll('.location-dot');
+            existingDots.forEach(dot => dot.remove());
+            
+            // Add new dot (simplified positioning based on location)
+            const dot = document.createElement('div');
+            dot.className = 'location-dot';
+            
+            // Simple location mapping (in real app, use proper geocoding)
+            const locationMap = {
+                'New York': { x: 25, y: 40 },
+                'London': { x: 50, y: 35 },
+                'Tokyo': { x: 85, y: 45 },
+                'Sydney': { x: 90, y: 75 },
+                'California': { x: 15, y: 45 },
+                'Paris': { x: 52, y: 38 },
+                'Berlin': { x: 55, y: 35 },
+                'Mumbai': { x: 72, y: 55 },
+                'Singapore': { x: 80, y: 60 },
+                'Dubai': { x: 65, y: 50 }
+            };
+            
+            const coords = locationMap[location] || { x: 50, y: 50 };
+            dot.style.left = `${coords.x}%`;
+            dot.style.top = `${coords.y}%`;
+            
+            map.appendChild(dot);
+        }
+
+        function addToLedger(transactionData, analysis) {
+            const ledgerBody = document.getElementById('ledgerBody');
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>#${transactionId.toString().padStart(4, '0')}</td>
+                <td>${transactionData.currency} ${transactionData.amount.toFixed(2)}</td>
+                <td>${transactionData.merchant}</td>
+                <td class="status-${analysis.status.toLowerCase()}">${analysis.status}</td>
+                <td>${analysis.riskScore}</td>
+                <td>${transactionData.location}</td>
+            `;
+            
+            // Add with animation
+            row.style.opacity = '0';
+            row.style.transform = 'translateX(100px)';
+            ledgerBody.insertBefore(row, ledgerBody.firstChild);
+            
+            setTimeout(() => {
+                row.style.transition = 'all 0.5s ease';
+                row.style.opacity = '1';
+                row.style.transform = 'translateX(0)';
+            }, 100);
+            
+            transactionId++;
+            
+            // Keep only last 10 transactions
+            while (ledgerBody.children.length > 10) {
+                ledgerBody.removeChild(ledgerBody.lastChild);
+            }
+        }
+
+        // Enhanced Transaction Ledger function - separate from addToLedger()
+        function addTransactionToLedger(transactionData, analysis) {
+            const ledgerBody = document.getElementById('ledgerBody');
+            
+            // Handle transactions with proper IDs from backend
+            const displayId = analysis.transactionId || `#${transactionId.toString().padStart(4, '0')}`;
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${displayId}</td>
+                <td>${transactionData.currency} ${transactionData.amount.toFixed(2)}</td>
+                <td>${transactionData.merchant}</td>
+                <td class="status-${analysis.status.toLowerCase()}">${analysis.status}</td>
+                <td>${analysis.riskScore}</td>
+                <td>${transactionData.location}</td>
+            `;
+            
+            // Add with animation
+            row.style.opacity = '0';
+            row.style.transform = 'translateX(100px)';
+            ledgerBody.insertBefore(row, ledgerBody.firstChild);
+            
+            setTimeout(() => {
+                row.style.transition = 'all 0.5s ease';
+                row.style.opacity = '1';
+                row.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // Only increment if no backend ID provided
+            if (!analysis.transactionId) {
+                transactionId++;
+            }
+            
+            // Keep only last 10 transactions
+            while (ledgerBody.children.length > 10) {
+                ledgerBody.removeChild(ledgerBody.lastChild);
+            }
+        }
+
+        function showProcessing(show) {
+            const overlay = document.getElementById('processingOverlay');
+            const btn = document.getElementById('analyzeBtn');
+            
+            if (show) {
+                overlay.classList.add('active');
+                btn.disabled = true;
+            } else {
+                overlay.classList.remove('active');
+                btn.disabled = false;
+            }
+        }
+
+        function showError(message) {
+            const summaryElement = document.getElementById('aiSummary');
+            summaryElement.textContent = `Error: ${message}`;
+            summaryElement.style.color = '#FF4444';
+            
+            setTimeout(() => {
+                summaryElement.style.color = '';
+                summaryElement.textContent = 'Awaiting transaction data...';
+            }, 5000);
+        }
+
+        // Add some demo data on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                // Add sample transaction to ledger
+                const sampleTransaction = {
+                    amount: 1250.00,
+                    currency: 'USD',
+                    merchant: 'TechStore Pro',
+                    location: 'New York'
+                };
+                
+                const sampleAnalysis = {
+                    riskScore: 25,
+                    status: 'Approved',
+                    summary: 'Transaction approved - normal spending pattern detected.'
+                };
+                
+                addToLedger(sampleTransaction, sampleAnalysis);
+            }, 4000);
+        });
+    </script>
+</body>
+</html>
