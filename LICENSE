@@ -1,0 +1,53 @@
+MIT License
+
+Copyright (c) 2024 AEGIS AI - Advanced Fraud Detection System
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+ADDITIONAL TERMS FOR AEGIS AI FRAUD DETECTION SYSTEM:
+
+1. COMMERCIAL USE: This software may be used for commercial purposes without 
+   restriction, including in financial institutions and fraud detection services.
+
+2. AI MODEL INTEGRATION: The integration with Google Gemini AI is subject to 
+   Google's terms of service and API usage policies. Users are responsible for 
+   obtaining and maintaining their own API keys and complying with Google's terms.
+
+3. DATA PRIVACY: Users implementing this system are responsible for ensuring 
+   compliance with applicable data protection regulations (GDPR, CCPA, etc.) 
+   when processing transaction data and personal information.
+
+4. SECURITY DISCLAIMER: While this software includes security features and 
+   fraud detection capabilities, users are responsible for implementing 
+   additional security measures appropriate for their specific use case and 
+   regulatory requirements.
+
+5. NO WARRANTY FOR FRAUD DETECTION ACCURACY: The fraud detection algorithms 
+   and AI models are provided "as is" without warranty of accuracy, completeness, 
+   or effectiveness in detecting fraudulent transactions. Users should implement 
+   additional verification and monitoring systems.
+
+6. THIRD-PARTY DEPENDENCIES: This software relies on third-party packages and 
+   services. Users are responsible for reviewing and complying with the licenses 
+   and terms of all dependencies.
+
+For questions regarding this license or commercial licensing options, please 
+contact the AEGIS AI development team.
